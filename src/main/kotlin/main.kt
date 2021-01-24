@@ -45,20 +45,14 @@ fun main()
  * currentPayment - Сумма совершаемого перевода в копейках
  * результат      - комиссия в копейках
  */
-
 fun calcPaymentCommission (cardType : CardTypes = CardTypes.VKPay,
                            lastMonthPayments : Long = 0, currentPayment : Long) : Long
 {
-    val mastercardMaestroMonthLimit = 75_000_00
     val noCommission = 0L
     return when(cardType) {
         CardTypes.Mastercard, CardTypes.Maestro ->
-            if (lastMonthPayments < mastercardMaestroMonthLimit) {
-                noCommission
-            } else {
-                calcMastercardMaestroCommission(currentPayment)
-            }
-        CardTypes.Visa, CardTypes.Mir -> calcVisaMirCommission(currentPayment)
+                                         calcMastercardMaestroCommission(currentPayment, lastMonthPayments)
+        CardTypes.Visa, CardTypes.Mir -> calcVisaMirCommission          (currentPayment)
         else                          -> noCommission
     }
 }
@@ -70,11 +64,17 @@ fun calcPaymentCommission (cardType : CardTypes = CardTypes.VKPay,
  * currentPayment - Сумма совершаемого перевода в копейках
  * результат      - комиссия в копейках
  */
-fun calcMastercardMaestroCommission(currentPayment : Long) : Long
+fun calcMastercardMaestroCommission(currentPayment : Long, lastMonthPayments : Long) : Long
 {
-    val commissionPercent = 0.6F
-    val commissionFix     = 20_00.0F
-    return (currentPayment * commissionPercent / 100.0F + commissionFix).toLong()
+    val noCommission                = 0L
+    val commissionPercent           = 0.6F
+    val commissionFix               = 20_00.0F
+    val mastercardMaestroMonthLimit = 75_000_00
+    return if (lastMonthPayments < mastercardMaestroMonthLimit) {
+        noCommission
+    } else {
+        (currentPayment * commissionPercent / 100.0F + commissionFix).toLong()
+    }
 }
 
 /**
